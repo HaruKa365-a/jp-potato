@@ -17,7 +17,6 @@
       --yes-bg: #ecfdf5;
       --no: #ef4444;
       --no-bg: #fef2f2;
-      /* 차트 및 상태 컬러 */
       --pastel-green: #bbf7d0;
       --pastel-green-text: #15803d;
       --pastel-blue: #bae6fd;
@@ -39,7 +38,6 @@
       padding-bottom: 60px;
     }
 
-    /* 상단 네비게이션 */
     header {
       background: var(--card);
       border-bottom: 1px solid var(--border);
@@ -72,7 +70,6 @@
     main { max-width: 760px; margin: 24px auto; padding: 0 16px; }
     .hidden { display: none !important; }
 
-    /* 학습 상단 상태바 */
     .study-top-bar {
       display: flex;
       justify-content: flex-end;
@@ -89,7 +86,6 @@
       border: 1px solid var(--border);
     }
 
-    /* 플래시카드 영역 */
     .flashcard {
       background: var(--card);
       border: 1px solid var(--border);
@@ -116,7 +112,6 @@
     .tag-word { background: var(--pastel-green); color: var(--pastel-green-text); }
     .tag-sentence { background: var(--pastel-blue); color: var(--pastel-blue-text); }
 
-    /* 우측 상단 휴지통 버튼 */
     .trash-icon-btn {
       position: absolute;
       top: 14px;
@@ -141,7 +136,6 @@
 
     .front-text { font-size: 1.55rem; font-weight: 700; margin-bottom: 12px; }
 
-    /* 힌트 숨기기 / 보이기 토글 버튼 */
     .hint-toggle {
       cursor: pointer;
       background: #f1f5f9;
@@ -161,7 +155,6 @@
     .hint-toggle.revealed { background: #eef2ff; color: var(--primary); border: 1px solid #c7d2fe; font-weight: 600; cursor: default; }
     .hint-toggle.revealed:hover { background: #eef2ff; }
 
-    /* 예문 입력창 */
     .sentence-input-box {
       width: 100%;
       max-width: 520px;
@@ -203,7 +196,6 @@
       cursor: pointer;
     }
 
-    /* 카드 뒷면 */
     .back-section {
       width: 100%;
       margin-top: 20px;
@@ -265,7 +257,6 @@
       font-weight: 700;
     }
 
-    /* 드래그 & 단어 줍기 영역 */
     .word-picker {
       margin-top: 16px;
       padding: 12px 14px;
@@ -360,7 +351,6 @@
       font-weight: 700;
     }
 
-    /* 중앙 하단 Yes / No 판정 버튼 */
     .judge-buttons {
       max-width: 440px;
       margin: 20px auto 0;
@@ -381,7 +371,6 @@
     .btn-no { background: var(--no-bg); color: var(--no); border: 1.5px solid #fecaca; }
     .btn-yes { background: var(--yes-bg); color: var(--yes); border: 1.5px solid #a7f3d0; }
 
-    /* 대시보드 스타일 */
     .panel {
       background: var(--card);
       border: 1px solid var(--border);
@@ -411,7 +400,6 @@
     }
     .pill-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-    /* 전체 카드 관리 우측 단어 추가 및 다운로드 버튼 3종 */
     .manage-btn-group {
       display: flex;
       gap: 6px;
@@ -472,7 +460,6 @@
     .stat-num { font-size: 1.45rem; font-weight: 800; }
     .stat-label { font-size: 0.8rem; color: var(--muted); }
 
-    /* 주식 차트형 세로 누적 막대그래프 (3색) */
     .chart-legend {
       display: flex;
       justify-content: space-between;
@@ -552,7 +539,6 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       transition: height 0.25s ease;
     }
-    /* 차트 세그먼트 (Yes-예문, Yes-단어, No-전체) */
     .seg-sentence {
       background: var(--pastel-blue);
       color: var(--pastel-blue-text);
@@ -595,7 +581,6 @@
       font-weight: 800;
     }
 
-    /* 카드 리스트 & 추가/편집 폼 */
     .list-controls {
       display: flex;
       gap: 8px;
@@ -733,7 +718,6 @@
 </header>
 
 <main>
-  <!-- ==================== 1. 학습 탭 (단어+예문 통합) ==================== -->
   <section id="tab-study">
     <div class="study-top-bar">
       <div class="queue-info" id="queue-info">남은 카드: 0장</div>
@@ -742,9 +726,7 @@
     <div id="study-area"></div>
   </section>
 
-  <!-- ==================== 2. 대시보드 탭 ==================== -->
   <section id="tab-dashboard" class="hidden">
-    <!-- 학습량 Progress -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">학습 진도 (Progress)</div>
@@ -791,7 +773,6 @@
       </div>
     </div>
 
-    <!-- 전체 카드 리스트 & 인라인 관리 -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">전체 카드 관리</div>
@@ -802,7 +783,6 @@
         </div>
       </div>
 
-      <!-- 단일 추가 폼 -->
       <div id="add-form" class="add-form hidden">
         <select id="new-type">
           <option value="word">단어 카드</option>
@@ -816,7 +796,6 @@
         </div>
       </div>
 
-      <!-- 일괄 추가 (시트 붙여넣기) 폼 -->
       <div id="bulk-form" class="add-form hidden">
         <div class="bulk-guide">
           <strong>📋 구글 시트 불러오기:</strong> 시트를 복사(Ctrl+C)해 아래에 붙여넣기(Ctrl+V) 하세요.<br/>
@@ -943,7 +922,6 @@
   }
   saveData();
 
-  // 상태 변수
   let sessionQueue = [];
   let isFlipped = false;
   let userTypedText = '';
@@ -957,10 +935,9 @@
   }
 
   function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\]/g, '\$&');
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  // 일본어 단어 어간 추출 (예: 上達する -> 上達)
   function extractStem(word) {
     const clean = word.trim();
     if (clean.endsWith('する') && clean.length >= 4) return clean.slice(0, -2);
@@ -968,7 +945,6 @@
     return stem.length >= 2 ? stem : clean;
   }
 
-  // 예문 텍스트 안에서 보유 단어(어간 기준 2글자 이상)를 파스텔 보라색으로 하이라이트
   function highlightOwnedWords(sentence) {
     const stems = cards
       .filter(c => c.type === 'word' && c.ja)
@@ -989,7 +965,6 @@
     }).join('');
   }
 
-  // 탭 전환
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     if (tab === 'study') {
@@ -1007,7 +982,6 @@
     }
   }
 
-  // 단어 + 예문 통합 큐 생성
   function shuffleArray(arr) {
     const copy = [...arr];
     for (let i = copy.length - 1; i > 0; i--) {
@@ -1334,7 +1308,6 @@
     }
   });
 
-  // ==================== 대시보드 (9가지 조합 실시간 연동) ====================
   function setPeriod(period, btn) {
     periodFilter = period;
     selectedPeriodKey = null;
@@ -1473,7 +1446,6 @@
     });
   })();
 
-  // ==================== 리스트 관리 ====================
   function toggleAddForm() {
     document.getElementById('bulk-form').classList.add('hidden');
     document.getElementById('add-form').classList.toggle('hidden');
@@ -1707,7 +1679,6 @@
     }).join('');
   }
 
-  // 초기 실행
   buildQueue();
 </script>
 </body>
