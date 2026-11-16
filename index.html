@@ -1282,8 +1282,7 @@
         targetCard.status = 'no';
         targetCard.level = 0;
         targetCard.nextReview = today;
-        const insertIdx = Math.min(2, sessionQueue.length);
-        sessionQueue.splice(insertIdx, 0, targetCard);
+        sessionQueue.push(targetCard);
       }
     }
 
