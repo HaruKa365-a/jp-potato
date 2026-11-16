@@ -820,8 +820,8 @@
       <div id="bulk-form" class="add-form hidden">
         <div class="bulk-guide">
           <strong>📋 구글 시트 불러오기:</strong> 시트를 복사(Ctrl+C)해 아래에 붙여넣기(Ctrl+V) 하세요.<br/>
-          유형은 생략 가능합니다. <br/>  
-          • 3열(혹은 2열) 형식: <code>유형(단어 or 예문) &nbsp;|&nbsp; 한국어 &nbsp;|&nbsp; 일본어 </code><br/>
+          유형과 메모는 생략 가능합니다.<br/>
+          • 형식: <code>유형(단어/예문) &nbsp;|&nbsp; 한국어 &nbsp;|&nbsp; 일본어 &nbsp;|&nbsp; 메모(히라가나·유의어 등)</code>
         </div>
         <textarea id="bulk-textarea" rows="6" placeholder="여기에 구글 시트 내용을 붙이세요."></textarea>
         <div class="form-btn-row">
@@ -906,7 +906,7 @@
       type: 'word',
       ko: '압박을 받다',
       ja: 'プレッシャーを感じる',
-      reading: 'プレッシャーをかんじる',
+      reading: 'プレッシャーをかんじる (유의어: プレッシャーをかけられる)',
       status: 'new',
       level: 0,
       nextReview: getToday()
@@ -957,7 +957,7 @@
   }
 
   function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return str.replace(/[.*+?^${}()|[\]\]/g, '\$&');
   }
 
   // 일본어 단어 어간 추출 (예: 上達する -> 上達)
@@ -1115,7 +1115,6 @@
 
       let pickerHtml = '';
       if (!isWord) {
-        // [수정 2] 단어 줍기 파트 2칸(일본어 입력 / 한국어 입력)으로 간소화
         pickerHtml = `
           <div class="word-picker">
             <div class="word-picker-guide">
@@ -1245,7 +1244,7 @@
       type: 'word',
       ko,
       ja,
-      reading: '', // 읽기 입력칸 제거에 따라 빈 값 처리
+      reading: '',
       status: 'new',
       level: 0,
       nextReview: getToday()
@@ -1280,14 +1279,12 @@
     renderStudyCard();
   }
 
-  // [수정 핵심] Yes / No 실시간 덮어쓰기 (No -> Yes 시 No 기록 지워짐)
   function judgeCard(isYes) {
     const current = sessionQueue.shift();
     const targetCard = cards.find(c => c.id === current.id);
     const today = getToday();
     const newResult = isYes ? 'yes' : 'no';
 
-    // 해당 날짜 + 카드 조합의 기록을 항상 최신 상태로 100% 덮어쓰기
     const existingLogIdx = logs.findIndex(l => l.date === today && l.cardId === current.id);
     if (existingLogIdx !== -1) {
       logs[existingLogIdx].result = newResult;
@@ -1375,7 +1372,6 @@
     return key.slice(2);
   }
 
-  // [수정 1] 3색 바 차트 렌더링
   function renderDashboard() {
     const today = getToday();
     const defaultKey = getGroupKey(today, periodFilter);
@@ -1403,7 +1399,6 @@
       const key = getGroupKey(l.date, periodFilter);
       if (!grouped[key]) grouped[key] = { wordYes: 0, sentYes: 0, noCount: 0 };
       
-      // 3분할 카운팅: Yes인 단어 / Yes인 예문 / 결과가 No인 모든 카드
       if (l.result === 'no') {
         grouped[key].noCount++;
       } else {
@@ -1478,7 +1473,7 @@
     });
   })();
 
-  // ==================== 리스트 관리 (단일 추가 / 일괄 추가 / CSV 다운로드) ====================
+  // ==================== 리스트 관리 ====================
   function toggleAddForm() {
     document.getElementById('bulk-form').classList.add('hidden');
     document.getElementById('add-form').classList.toggle('hidden');
@@ -1497,18 +1492,15 @@
     const type = document.getElementById('new-type').value;
     const ko = document.getElementById('new-ko').value.trim();
     const ja = document.getElementById('new-ja').value.trim();
-    const extra = document.getElementById('new-reading').value.trim();
     if (!ko || !ja) return alert('한국어와 일본어를 모두 입력해 주세요.');
-
-    const isKoreanHint = type === 'sentence' && /[가-힣]/.test(extra);
 
     cards.unshift({
       id: Date.now(),
       type,
       ko,
       ja,
-      reading: isKoreanHint ? '' : extra,
-      hint: isKoreanHint ? extra : '',
+      reading: '',
+      hint: '',
       status: 'new',
       level: 0,
       nextReview: getToday()
@@ -1516,7 +1508,6 @@
     saveData();
     document.getElementById('new-ko').value = '';
     document.getElementById('new-ja').value = '';
-    document.getElementById('new-reading').value = '';
     toggleAddForm();
     renderCardList();
   }
@@ -1543,37 +1534,35 @@
       let type = '';
       let ko = '';
       let ja = '';
-      let extra = '';
+      let memo = '';
 
       const firstColLower = cols[0].toLowerCase();
       if (firstColLower === '단어' || firstColLower === 'word') {
         type = 'word';
         ko = cols[1] || '';
         ja = cols[2] || '';
-        extra = cols[3] || '';
+        memo = cols[3] || '';
       } else if (firstColLower === '예문' || firstColLower === 'sentence') {
         type = 'sentence';
         ko = cols[1] || '';
         ja = cols[2] || '';
-        extra = cols[3] || '';
+        memo = cols[3] || '';
       } else {
         ko = cols[0] || '';
         ja = cols[1] || '';
-        extra = cols[2] || '';
+        memo = cols[2] || '';
         type = (ja.includes('。') || ja.includes('？') || ja.includes('！') || ja.length >= 12) ? 'sentence' : 'word';
       }
 
       if (!ko || !ja) return;
-
-      const isKoreanHint = type === 'sentence' && /[가-힣]/.test(extra);
 
       newCards.push({
         id: Date.now() + idx,
         type,
         ko,
         ja,
-        reading: isKoreanHint ? '' : extra,
-        hint: isKoreanHint ? extra : '',
+        reading: memo,
+        hint: '',
         status: 'new',
         level: 0,
         nextReview: today
@@ -1610,7 +1599,6 @@
     });
   }
 
-  // [수정 3] CSV 다운로드 4열 구성 (읽기/힌트 열 제외)
   function downloadCSV() {
     const targetList = getFilteredCards();
     if (targetList.length === 0) {
@@ -1659,13 +1647,8 @@
     if (!card) return;
     card.ko = document.getElementById(`edit-ko-${id}`).value.trim();
     card.ja = document.getElementById(`edit-ja-${id}`).value.trim();
-    const extra = document.getElementById(`edit-read-${id}`).value.trim();
-    if (card.type === 'sentence' && /[가-힣]/.test(extra)) {
-      card.hint = extra;
-      card.reading = '';
-    } else {
-      card.reading = extra;
-    }
+    card.reading = document.getElementById(`edit-read-${id}`).value.trim();
+    card.hint = '';
     editingId = null;
     saveData();
     renderCardList();
@@ -1695,7 +1678,7 @@
             <div class="edit-inputs">
               <input id="edit-ko-${c.id}" value="${escapeHtml(c.ko)}" />
               <input id="edit-ja-${c.id}" value="${escapeHtml(c.ja)}" />
-              <input id="edit-read-${c.id}" value="${escapeHtml(subText)}" placeholder="읽기/힌트" />
+              <input id="edit-read-${c.id}" value="${escapeHtml(subText)}" placeholder="메모 (히라가나, 유의어 등)" />
             </div>
             <div class="item-actions">
               <button class="mini-btn" style="background:var(--primary); color:white;" onclick="saveEdit(${c.id})">저장</button>
