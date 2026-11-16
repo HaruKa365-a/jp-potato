@@ -808,8 +808,8 @@
           <option value="word">단어 카드</option>
           <option value="sentence">예문 카드</option>
         </select>
-        <input type="text" id="new-ko" placeholder="한국어 뜻 (예: 실력이 늘다)" />
-        <input type="text" id="new-ja" placeholder="일본어 정답 (예: 上達する)" />
+        <input type="text" id="new-ko" placeholder="한국어 (예: 실력이 늘다)" />
+        <input type="text" id="new-ja" placeholder="일본어 (예: 上達する)" />
         <div class="form-btn-row">
           <button class="form-cancel-btn" onclick="toggleAddForm()">취소</button>
           <button class="form-submit-btn" onclick="addNewCard()">저장하기</button>
@@ -1581,7 +1581,7 @@
     });
 
     if (newCards.length === 0) {
-      alert('등록할 수 있는 유효한 줄을 찾지 못했습니다.\n각 줄에 최소 [한국어 뜻]과 [일본어 정답] 두 칸이 있어야 합니다.');
+      alert('등록할 수 있는 유효한 줄을 찾지 못했습니다.\n각 줄에 최소 [한국어]과 [일본어] 두 칸이 있어야 합니다.');
       return;
     }
 
@@ -1618,7 +1618,7 @@
       return;
     }
 
-    const headers = ['유형', '상태', '한국어 뜻', '일본어 정답'];
+    const headers = ['유형', '상태', '한국어', '일본어'];
     const rows = targetList.map(c => {
       const typeLabel = c.type === 'word' ? '단어' : '예문';
       const statusLabel = c.status === 'yes' ? 'Yes' : (c.status === 'no' ? 'No' : '미학습');
