@@ -17,7 +17,7 @@
       --yes-bg: #ecfdf5;
       --no: #ef4444;
       --no-bg: #fef2f2;
-      /* 파스텔 차트 및 상태 컬러 */
+      /* 차트 및 상태 컬러 */
       --pastel-green: #bbf7d0;
       --pastel-green-text: #15803d;
       --pastel-blue: #bae6fd;
@@ -230,14 +230,6 @@
       border-bottom: 1.5px solid var(--pastel-purple-border);
     }
     .ja-reading { font-size: 0.95rem; color: var(--muted); margin-top: 4px; }
-    .ja-synonyms {
-      margin-top: 10px;
-      font-size: 0.9rem;
-      background: #f8fafc;
-      padding: 8px 12px;
-      border-radius: 8px;
-      display: inline-block;
-    }
     .user-attempt {
       margin-bottom: 12px;
       padding: 10px;
@@ -273,7 +265,7 @@
       font-weight: 700;
     }
 
-    /* 드래그 & 즉석 단어 줍기 영역 */
+    /* 드래그 & 단어 줍기 영역 */
     .word-picker {
       margin-top: 16px;
       padding: 12px 14px;
@@ -419,7 +411,7 @@
     }
     .pill-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-    /* 전체 카드 관리 우측 컴팩트 버튼 3종 */
+    /* 전체 카드 관리 우측 단어 추가 및 다운로드 버튼 3종 */
     .manage-btn-group {
       display: flex;
       gap: 6px;
@@ -824,7 +816,7 @@
         </div>
       </div>
 
-      <!-- 일괄 추가 (구글 시트 붙여넣기) 폼 -->
+      <!-- 일괄 추가 (시트 붙여넣기) 폼 -->
       <div id="bulk-form" class="add-form hidden">
         <div class="bulk-guide">
           <strong>📋 구글 시트 불러오기:</strong> 시트를 복사(Ctrl+C)해 아래에 붙여넣기(Ctrl+V) 하세요.<br/>
@@ -885,7 +877,6 @@
       ko: '실력이 늘다 / 숙달되다 (자동사)',
       ja: '上達する',
       reading: 'じょうたつする',
-      synonyms: '',
       status: 'new',
       level: 0,
       nextReview: getToday()
@@ -896,7 +887,6 @@
       ko: '실력이 뻗어나가다 (자동사)',
       ja: '力が伸びる',
       reading: 'ちからがのびる',
-      synonyms: '',
       status: 'new',
       level: 0,
       nextReview: getToday()
@@ -907,7 +897,6 @@
       ko: '실력을 늘리다',
       ja: '日本語力を上げる',
       reading: 'にほんごりょくをあげる',
-      synonyms: '',
       status: 'new',
       level: 0,
       nextReview: getToday()
@@ -918,7 +907,6 @@
       ko: '압박을 받다',
       ja: 'プレッシャーを感じる',
       reading: 'プレッシャーをかんじる',
-      synonyms: '유의어: プレッシャーをかけられる',
       status: 'new',
       level: 0,
       nextReview: getToday()
@@ -929,7 +917,6 @@
       ko: '스트레스를 주다',
       ja: 'ストレスを与える',
       reading: 'ストレスをあたえる',
-      synonyms: '',
       status: 'new',
       level: 0,
       nextReview: getToday()
@@ -1158,7 +1145,6 @@
             ${!isWord && userTypedText ? `<div class="user-attempt">내 입력: <strong>${escapeHtml(userTypedText)}</strong></div>` : ''}
             <div class="ja-main" id="ja-sentence-text" onmouseup="handleTextDrag(true)">${renderedJa}</div>
             ${card.reading ? `<div class="ja-reading">${escapeHtml(card.reading)}</div>` : ''}
-            ${card.synonyms ? `<div class="ja-synonyms">${escapeHtml(card.synonyms)}</div>` : ''}
             <div class="back-actions">
               <button class="audio-btn" onclick="speakCurrentCard()">🔊 발음 듣기</button>
               ${!isWord ? `<button class="pick-open-btn" onclick="openQuickPick('')">+ 단어 직접 줍기</button>` : ''}
@@ -1260,7 +1246,6 @@
       ko,
       ja,
       reading: '', // 읽기 입력칸 제거에 따라 빈 값 처리
-      synonyms: '',
       status: 'new',
       level: 0,
       nextReview: getToday()
@@ -1523,7 +1508,6 @@
       ko,
       ja,
       reading: isKoreanHint ? '' : extra,
-      synonyms: '',
       hint: isKoreanHint ? extra : '',
       status: 'new',
       level: 0,
@@ -1589,7 +1573,6 @@
         ko,
         ja,
         reading: isKoreanHint ? '' : extra,
-        synonyms: '',
         hint: isKoreanHint ? extra : '',
         status: 'new',
         level: 0,
