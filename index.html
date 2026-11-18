@@ -1142,8 +1142,8 @@
         <div class="flashcard">
           ${frontHtml}
           <div style="display:flex; justify-content:center; gap:8px; margin-top:20px;">
-             <button class="flip-btn" style="margin-top:0;" onclick="flipCard()">정답 확인</button>
-             ${lastJudged ? `<button class="flip-btn" style="margin-top:0; background:#f1f5f9; color:var(--muted); border:1px solid var(--border);" onclick="undoJudge()">뒤로</button>` : ''}
+             <button class="flip-btn" style="margin-top:0;" onclick="flipCard()">정답 확인 (Enter)</button>
+             ${lastJudged ? `<button class="flip-btn" style="margin-top:0; background:#f1f5f9; color:var(--muted); border:1px solid var(--border);" onclick="undoJudge()">↶ 뒤로 (←)</button>` : ''}
           </div>
         </div>
       `;
@@ -1190,8 +1190,8 @@
           </div>
         </div>
         <div class="judge-buttons">
-          <button class="judge-btn btn-no" onclick="judgeCard(false)">✕ No (다시)</button>
-          <button class="judge-btn btn-yes" onclick="judgeCard(true)">○ Yes (통과)</button>
+          <button class="judge-btn btn-no" onclick="judgeCard(false)">✕ No (다시) [←]</button>
+          <button class="judge-btn btn-yes" onclick="judgeCard(true)">○ Yes (통과) [→]</button>
         </div>
       `;
       speakCurrentCard();
@@ -1409,9 +1409,12 @@
     if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
     if (sessionQueue.length === 0) return;
 
-    if (e.code === 'Space' && !isFlipped) {
+    if (e.key === 'Enter' && !isFlipped) {
       e.preventDefault();
       flipCard();
+    } else if (e.key === 'ArrowLeft' && !isFlipped && lastJudged) {
+      e.preventDefault();
+      undoJudge();
     } else if (isFlipped && e.key === 'ArrowLeft') {
       judgeCard(false);
     } else if (isFlipped && e.key === 'ArrowRight') {
