@@ -814,6 +814,7 @@
         <div class="manage-btn-group">
           <button class="compact-btn compact-primary" onclick="toggleAddForm()">+ 단일 추가</button>
           <button class="compact-btn compact-sub" onclick="toggleBulkForm()">+ 일괄 추가</button>
+          <button class="compact-btn compact-outline" onclick="removeDuplicateCards()" title="일본어가 같은 중복 카드 정리">중복 정리</button>
           <button class="compact-btn compact-outline" onclick="downloadCSV()">CSV 다운로드</button>
         </div>
       </div>
@@ -1600,11 +1601,23 @@
     }
   }
 
+  function normalizeJa(str = '') {
+    return str
+      .trim()
+      .replace(/[。．.？?！!、,，\s\u3000]+/g, '');
+  }
+
   function addNewCard() {
     const type = document.getElementById('new-type').value;
     const ko = document.getElementById('new-ko').value.trim();
     const ja = document.getElementById('new-ja').value.trim();
     if (!ko || !ja) return alert('한국어와 일본어를 모두 입력해 주세요.');
+
+    const existing = cards.find(c => normalizeJa(c.ja) === normalizeJa(ja));
+    if (existing) {
+      const proceed = confirm(`이미 등록된 일본어 표현입니다:\n• 기존: ${existing.ja} (${existing.ko})\n\n그래도 중복으로 추가할까요?`);
+      if (!proceed) return;
+    }
 
     cards.unshift({
       id: Date.now(),
@@ -1631,6 +1644,15 @@
     const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     const newCards = [];
     const today = getToday();
+
+    const existingMap = new Map();
+    cards.forEach(c => {
+      const key = normalizeJa(c.ja);
+      if (key && !existingMap.has(key)) existingMap.set(key, c);
+    });
+    const batchSeen = new Set();
+    const skippedList = [];
+    let memoUpdatedCount = 0;
 
     lines.forEach((line, idx) => {
       let cols = line.includes('\t')
@@ -1668,6 +1690,18 @@
 
       if (!ko || !ja) return;
 
+      const normKey = normalizeJa(ja);
+      if (existingMap.has(normKey) || batchSeen.has(normKey)) {
+        skippedList.push(ja);
+        const existingCard = existingMap.get(normKey);
+        if (existingCard && !existingCard.reading && memo) {
+          existingCard.reading = memo;
+          memoUpdatedCount++;
+        }
+        return;
+      }
+
+      batchSeen.add(normKey);
       newCards.push({
         id: Date.now() + idx,
         type,
@@ -1681,17 +1715,82 @@
       });
     });
 
-    if (newCards.length === 0) {
+    if (newCards.length === 0 && skippedList.length === 0) {
       alert('등록할 수 있는 유효한 줄을 찾지 못했습니다.\n각 줄에 최소 [한국어]과 [일본어] 두 칸이 있어야 합니다.');
       return;
     }
 
-    cards.unshift(...newCards);
-    saveData();
+    if (newCards.length > 0 || memoUpdatedCount > 0) {
+      cards.unshift(...newCards);
+      saveData();
+      renderCardList();
+    }
+
     document.getElementById('bulk-textarea').value = '';
     toggleBulkForm();
+
+    if (newCards.length === 0 && skippedList.length > 0) {
+      const preview = skippedList.slice(0, 5).join(', ') + (skippedList.length > 5 ? ` 외 ${skippedList.length - 5}건` : '');
+      alert(`붙여넣은 ${skippedList.length}장은 모두 이미 등록된 중복 카드여서 추가되지 않았습니다.\n(${preview})`);
+      return;
+    }
+
+    if (skippedList.length > 0) {
+      const preview = skippedList.slice(0, 5).join(', ') + (skippedList.length > 5 ? ` 외 ${skippedList.length - 5}건` : '');
+      alert(`총 ${newCards.length}장의 새 카드가 등록되었습니다!\n(중복 제외 ${skippedList.length}장: ${preview})`);
+    } else {
+      alert(`총 ${newCards.length}장의 카드가 한 번에 등록되었습니다!`);
+    }
+  }
+
+  function removeDuplicateCards() {
+    const groups = new Map();
+    cards.forEach(c => {
+      const key = normalizeJa(c.ja);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(c);
+    });
+
+    let dupCount = 0;
+    const keptIds = new Set();
+    const statusRank = { yes: 3, no: 2, new: 1 };
+
+    groups.forEach(group => {
+      if (group.length === 1) {
+        keptIds.add(group[0].id);
+        return;
+      }
+      dupCount += group.length - 1;
+      const sorted = [...group].sort((a, b) => {
+        const rankDiff = (statusRank[b.status] || 0) - (statusRank[a.status] || 0);
+        if (rankDiff !== 0) return rankDiff;
+        const lvlDiff = (b.level || 0) - (a.level || 0);
+        if (lvlDiff !== 0) return lvlDiff;
+        const memoDiff = (b.reading ? 1 : 0) - (a.reading ? 1 : 0);
+        if (memoDiff !== 0) return memoDiff;
+        return a.id - b.id;
+      });
+      const keeper = sorted[0];
+      if (!keeper.reading) {
+        const withMemo = sorted.find(item => item.reading);
+        if (withMemo) keeper.reading = withMemo.reading;
+      }
+      keptIds.add(keeper.id);
+    });
+
+    if (dupCount === 0) {
+      alert('중복된 카드가 없습니다.');
+      return;
+    }
+
+    if (!confirm(`일본어가 동일한 중복 카드 ${dupCount}장이 발견되었습니다.\n학습 기록(Yes/No)이 있는 카드를 우선 유지하고 나머지를 삭제할까요?`)) {
+      return;
+    }
+
+    cards = cards.filter(c => keptIds.has(c.id));
+    saveData();
     renderCardList();
-    alert(`총 ${newCards.length}장의 카드가 한 번에 등록되었습니다!`);
+    alert(`중복 카드 ${dupCount}장이 정리되었습니다!`);
   }
 
   function getFilteredCards() {
