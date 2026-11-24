@@ -1033,13 +1033,23 @@
     return copy;
   }
 
+  function getNoCount(card) {
+    if (typeof card.noCount === 'number') return card.noCount;
+    return logs.filter(l => l.cardId === card.id && l.result === 'no').length;
+  }
+
   function buildQueue(forceAll = false) {
     const today = getToday();
     const pool = forceAll
       ? [...cards]
       : cards.filter(c => !c.nextReview || c.nextReview <= today);
 
-    sessionQueue = shuffleArray(pool);
+    const newCards = shuffleArray(pool.filter(c => !c.status || c.status === 'new'));
+    const noCards = shuffleArray(pool.filter(c => c.status === 'no'))
+      .sort((a, b) => getNoCount(b) - getNoCount(a));
+    const yesCards = shuffleArray(pool.filter(c => c.status === 'yes'));
+
+    sessionQueue = [...newCards, ...noCards, ...yesCards];
     isFlipped = false;
     userTypedText = '';
     renderStudyCard();
@@ -1362,6 +1372,10 @@
     const today = getToday();
     const newResult = isYes ? 'yes' : 'no';
 
+    if (targetCard && typeof targetCard.noCount !== 'number') {
+      targetCard.noCount = getNoCount(targetCard);
+    }
+
     const existingLogIdx = logs.findIndex(l => l.date === today && l.cardId === current.id);
     const prevLog = existingLogIdx !== -1 ? { ...logs[existingLogIdx] } : null;
 
@@ -1393,6 +1407,7 @@
       } else {
         targetCard.status = 'no';
         targetCard.level = 0;
+        targetCard.noCount = getNoCount(targetCard) + 1;
         targetCard.nextReview = today;
         sessionQueue.push(targetCard);
       }
